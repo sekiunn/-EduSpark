@@ -1,0 +1,98 @@
+name: eduspark-app
+
+services:
+  eduspark-backend:
+    build:
+      context: ./BACKEND/EduSpark
+      dockerfile: Dockerfile
+    image: eduspark/backend:local
+    container_name: eduspark-backend
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      JAVA_OPTS: ${JAVA_OPTS:--Xms512m -Xmx2048m}
+      SERVER_PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:-EdusparkSecretKey2024VeryLongAndSecureForJwtTokenGeneration}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://eduspark-postgres:5432/${POSTGRES_DB:-eduspark}?currentSchema=public&useUnicode=true&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      SPRING_DATA_REDIS_HOST: eduspark-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      RAG_STORAGE_BASE_PATH: /data/eduspark/knowledge
+      RAG_EMBEDDING_BASE_URL: ${RAG_EMBEDDING_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      RAG_EMBEDDING_API_KEY: ${RAG_EMBEDDING_API_KEY:-}
+      RAG_OLLAMA_BASE_URL: http://eduspark-ollama:11434
+      RAG_OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-mxbai-embed-large}
+      OLLAMA_CHAT_BASE_URL: http://eduspark-ollama:11434
+      LESSON_PLAN_WRITER_EXTERNAL_BASE_URL: ${LESSON_PLAN_WRITER_EXTERNAL_BASE_URL:-https://api.deepseek.com/v1}
+      LESSON_PLAN_WRITER_EXTERNAL_API_KEY: ${LESSON_PLAN_WRITER_EXTERNAL_API_KEY:-}
+      LESSON_PLAN_WRITER_EXTERNAL_MODEL: ${LESSON_PLAN_WRITER_EXTERNAL_MODEL:-deepseek-v4-flash}
+      INTERACTIVE_TEMPLATE_ENABLED: ${INTERACTIVE_TEMPLATE_ENABLED:-false}
+      INTERACTIVE_WRITER_EXTERNAL_BASE_URL: ${INTERACTIVE_WRITER_EXTERNAL_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      INTERACTIVE_WRITER_EXTERNAL_API_KEY: ${INTERACTIVE_WRITER_EXTERNAL_API_KEY:-}
+      INTERACTIVE_WRITER_EXTERNAL_MODEL: ${INTERACTIVE_WRITER_EXTERNAL_MODEL:-qwen3.6-plus}
+      PPT_THUMBNAIL_ENABLED: ${PPT_THUMBNAIL_ENABLED:-true}
+      LIBREOFFICE_PATH: /usr/bin/soffice
+      PPT_THUMBNAIL_TEMP_DIR: /app/temp/ppt-thumbnails
+      MULTIMODAL_VIDEO_FFMPEG_PATH: ffmpeg
+      MULTIMODAL_VIDEO_TEMP_DIR: /app/temp/video
+      ALIYUN_OSS_ENDPOINT: ${ALIYUN_OSS_ENDPOINT:-oss-cn-shanghai.aliyuncs.com}
+      ALIYUN_OSS_ACCESS_KEY_ID: ${ALIYUN_OSS_ACCESS_KEY_ID:-}
+      ALIYUN_OSS_ACCESS_KEY_SECRET: ${ALIYUN_OSS_ACCESS_KEY_SECRET:-}
+      ALIYUN_OSS_BUCKET_NAME: ${ALIYUN_OSS_BUCKET_NAME:-}
+      ALIYUN_OSS_BASE_URL: ${ALIYUN_OSS_BASE_URL:-}
+      ALIYUN_ASR_ENABLED: ${ALIYUN_ASR_ENABLED:-false}
+      ALIYUN_ASR_APP_KEY: ${ALIYUN_ASR_APP_KEY:-}
+      ALIYUN_ASR_ACCESS_KEY_ID: ${ALIYUN_ASR_ACCESS_KEY_ID:-}
+      ALIYUN_ASR_ACCESS_KEY_SECRET: ${ALIYUN_ASR_ACCESS_KEY_SECRET:-}
+      ALIYUN_ASR_TOKEN: ${ALIYUN_ASR_TOKEN:-}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - eduspark-backend-data:/data/eduspark
+      - eduspark-backend-temp:/app/temp
+    networks:
+      - eduspark-net
+
+  eduspark-client:
+    build:
+      context: ./HEADEND_CLIENT/EduSpark-Client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${CLIENT_API_BASE_URL:-/api}
+    image: eduspark/client:local
+    container_name: eduspark-client
+    restart: unless-stopped
+    depends_on:
+      - eduspark-backend
+    ports:
+      - "${CLIENT_PORT:-5173}:80"
+    networks:
+      - eduspark-net
+
+  eduspark-admin:
+    build:
+      context: ./HEADEND_ADMIN/EduSpark-Admin
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${ADMIN_API_BASE_URL:-/api}
+    image: eduspark/admin:local
+    container_name: eduspark-admin
+    restart: unless-stopped
+    depends_on:
+      - eduspark-backend
+    ports:
+      - "${ADMIN_PORT:-5174}:80"
+    networks:
+      - eduspark-net
+
+volumes:
+  eduspark-backend-data:
+  eduspark-backend-temp:
+
+networks:
+  eduspark-net:
+    external: true
+    name: eduspark-net

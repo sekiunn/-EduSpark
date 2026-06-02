@@ -1,0 +1,133 @@
+/**
+ * EduSpark · Design Tokens
+ * 全局视觉变量。所有组件应该引用这里的 token，而不是硬编码颜色 / 字号 / 间距。
+ *
+ * 主色：墨黑 + 米底（保持品牌纸质感，仅用于排版与卡片）
+ * 辅助色：知识蓝（仅用于主行动按钮、链接、active / focus / 进行中状态）
+ *
+ * 使用约定：
+ * - 文字、标题、icon → --es-text-* / --es-accent
+ * - 主按钮 / 选中态 / 进度条 / chip-active / focus ring → --es-link*
+ * - 不要让知识蓝出现在大面积背景上（容易抢戏）
+ */
+:root {
+  /* —— 背景与表面 —— */
+  --es-bg: #f7f6f3;
+  --es-surface: #ffffff;
+  --es-surface-soft: #faf9f6;
+  --es-surface-muted: #f5f3ee;
+
+  /* —— 边框 —— */
+  --es-border: #e5e0d6;
+  --es-border-strong: #d8d1c6;
+
+  /* —— 文本 —— */
+  --es-text-primary: #171614;
+  --es-text-secondary: #5d594f;
+  --es-text-tertiary: #8a8478;
+  --es-text-inverse: #ffffff;
+
+  /* —— 主色（墨黑） —— */
+  --es-accent: #1f1d1a;
+  --es-accent-soft: #ede8df;
+  --es-accent-contrast: #ffffff;
+
+  /* —— 辅助色（知识蓝）：行动 / 链接 / 选中 / 状态 —— */
+  --es-link: #2f6fe5;
+  --es-link-hover: #2256c7;
+  --es-link-soft: #e6effc;
+  --es-link-soft-strong: #d2e0f7;
+  --es-link-contrast: #ffffff;
+
+  /* —— 状态色 —— */
+  --es-success-bg: #eef4ef;
+  --es-success-text: #44624c;
+  --es-warning-bg: #f8f0e4;
+  --es-warning-text: #8a6531;
+  --es-danger-bg: #f8ece9;
+  --es-danger-text: #8e4e46;
+
+  /* —— 阴影 —— */
+  --es-shadow-xs: 0 6px 18px rgba(17, 16, 12, 0.04);
+  --es-shadow-sm: 0 16px 36px rgba(17, 16, 12, 0.05);
+  --es-shadow-md: 0 24px 56px rgba(17, 16, 12, 0.07);
+  --es-shadow-lg: 0 32px 72px rgba(17, 16, 12, 0.10);
+
+  /* —— 圆角 —— */
+  --es-radius-sm: 14px;
+  --es-radius-md: 18px;
+  --es-radius-lg: 24px;
+  --es-radius-pill: 999px;
+
+  /* —— 间距尺度（8 的倍数） —— */
+  --es-space-1: 4px;
+  --es-space-2: 8px;
+  --es-space-3: 12px;
+  --es-space-4: 16px;
+  --es-space-5: 20px;
+  --es-space-6: 24px;
+  --es-space-8: 32px;
+  --es-space-10: 40px;
+
+  /* —— 字体 —— */
+  --es-font-sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --es-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* —— 动效 —— */
+  --es-motion-fast: 160ms;
+  --es-motion-base: 260ms;
+  --es-motion-slow: 420ms;
+  --es-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* —— 全局排版基线 —— */
+html, body, #app {
+  font-family: var(--es-font-sans);
+  color: var(--es-text-primary);
+}
+
+/* —— 通用焦点环（无障碍）：除非组件自定义，否则交互元素 focus 时给一个知识蓝 ring —— */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--es-link);
+  outline-offset: 2px;
+}
+
+/* —— 与 KnowledgeDrawer 内已使用的 --kb-* 变量做向后兼容映射 ——
+ * 老组件继续工作，新组件统一用 --es-*。
+ * 等所有页面迁移完成后这段可删除。
+ */
+:root {
+  --kb-bg: var(--es-bg);
+  --kb-surface: var(--es-surface);
+  --kb-surface-soft: var(--es-surface-soft);
+  --kb-surface-muted: var(--es-surface-muted);
+  --kb-border: var(--es-border);
+  --kb-border-strong: var(--es-border-strong);
+  --kb-text-primary: var(--es-text-primary);
+  --kb-text-secondary: var(--es-text-secondary);
+  --kb-text-tertiary: var(--es-text-tertiary);
+  --kb-accent: var(--es-accent);
+  --kb-accent-soft: var(--es-accent-soft);
+  --kb-accent-contrast: var(--es-accent-contrast);
+  --kb-link: var(--es-link);
+  --kb-link-hover: var(--es-link-hover);
+  --kb-link-soft: var(--es-link-soft);
+  --kb-link-soft-strong: var(--es-link-soft-strong);
+  --kb-link-contrast: var(--es-link-contrast);
+  --kb-success-bg: var(--es-success-bg);
+  --kb-success-text: var(--es-success-text);
+  --kb-warning-bg: var(--es-warning-bg);
+  --kb-warning-text: var(--es-warning-text);
+  --kb-danger-bg: var(--es-danger-bg);
+  --kb-danger-text: var(--es-danger-text);
+  --kb-shadow-xs: var(--es-shadow-xs);
+  --kb-shadow-sm: var(--es-shadow-sm);
+  --kb-shadow-md: var(--es-shadow-md);
+  --kb-radius-sm: var(--es-radius-sm);
+  --kb-radius-md: var(--es-radius-md);
+  --kb-radius-lg: var(--es-radius-lg);
+  --kb-motion-fast: var(--es-motion-fast);
+  --kb-motion-base: var(--es-motion-base);
+  --kb-motion-slow: var(--es-motion-slow);
+  --kb-ease: var(--es-ease);
+}

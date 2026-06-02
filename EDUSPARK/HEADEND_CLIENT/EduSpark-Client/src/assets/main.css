@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gray-850: #1f2937;
+  --radius-3xl: 1.5rem;
+  --max-width-8xl: 88rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}
+
+.bg-gray-850 {
+  background-color: #1f2937;
+}
+
+.dark .bg-gray-850 {
+  background-color: #1f2937;
+}
+
+.hover\:bg-gray-850:hover {
+  background-color: #1f2937;
+}
+
+.dark .hover\:bg-gray-850:hover {
+  background-color: #1f2937;
+}
+
+.border-gray-850\/30 {
+  border-color: rgba(31, 41, 55, 0.3);
+}
+
+.dark .border-gray-850\/30 {
+  border-color: rgba(31, 41, 55, 0.3);
+}
+
+.bg-gray-500\/5 {
+  background-color: rgba(107, 114, 128, 0.05);
+}
+
+.dark .bg-gray-500\/5 {
+  background-color: rgba(107, 114, 128, 0.05);
+}
+
+.bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.bg-gray-100\/30 {
+  background-color: rgba(243, 244, 246, 0.3);
+}
+
+.dark .bg-gray-100\/30 {
+  background-color: rgba(243, 244, 246, 0.3);
+}
+
+.bg-linear-to-b {
+  background-image: linear-gradient(to bottom);
+}
+
+.from-white\/90 {
+  --tw-gradient-from: rgba(255, 255, 255, 0.9);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent);
+}
+
+.via-white\/50 {
+  --tw-gradient-stops: var(--tw-gradient-from), rgba(255, 255, 255, 0.5), var(--tw-gradient-to, transparent);
+}
+
+.to-transparent {
+  --tw-gradient-to: transparent;
+}
+
+.dark .from-gray-900\/90 {
+  --tw-gradient-from: rgba(17, 24, 39, 0.9);
+}
+
+.dark .via-gray-900\/50 {
+  --tw-gradient-stops: var(--tw-gradient-from), rgba(17, 24, 39, 0.5), var(--tw-gradient-to, transparent);
+}
+
+.pb-18 {
+  padding-bottom: 4.5rem;
+}
+
+.size-5 {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.size-6 {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.size-8 {
+  width: 2rem;
+  height: 2rem;
+}
+
+.size-9 {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.size-10 {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.font-primary {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.markdown-prose {
+  line-height: 1.75;
+}
+
+.markdown-prose p {
+  margin-bottom: 1em;
+}
+
+.markdown-prose p:last-child {
+  margin-bottom: 0;
+}

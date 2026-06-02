@@ -1,0 +1,93 @@
+name: eduspark-infra
+
+services:
+  eduspark-postgres:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    image: eduspark/postgres-pgvector-pgroonga:pg16
+    container_name: eduspark-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-eduspark}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123456}
+      TZ: Asia/Shanghai
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - eduspark-postgres-data:/var/lib/postgresql/data
+      - ./BACKEND/EduSpark/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - eduspark-net
+
+  eduspark-redis:
+    image: redis:7.2-alpine
+    container_name: eduspark-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      TZ: Asia/Shanghai
+    command: >
+      sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then
+        redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD";
+      else
+        redis-server --appendonly yes;
+      fi'
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - eduspark-redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -n \"$${REDIS_PASSWORD}\" ]; then redis-cli -a \"$${REDIS_PASSWORD}\" ping; else redis-cli ping; fi"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - eduspark-net
+
+  eduspark-ollama:
+    image: ollama/ollama:latest
+    container_name: eduspark-ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - eduspark-ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+    networks:
+      - eduspark-net
+
+  eduspark-ollama-models:
+    image: ollama/ollama:latest
+    container_name: eduspark-ollama-models
+    profiles:
+      - models
+    environment:
+      OLLAMA_HOST: http://eduspark-ollama:11434
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      "until ollama list >/dev/null 2>&1; do sleep 3; done &&
+      ollama pull ${OLLAMA_EMBEDDING_MODEL:-mxbai-embed-large}"
+    depends_on:
+      - eduspark-ollama
+    networks:
+      - eduspark-net
+
+volumes:
+  eduspark-postgres-data:
+  eduspark-redis-data:
+  eduspark-ollama-data:
+
+networks:
+  eduspark-net:
+    name: eduspark-net

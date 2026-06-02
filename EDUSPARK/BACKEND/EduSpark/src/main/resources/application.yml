@@ -1,0 +1,213 @@
+spring:
+  application:
+    name: eduspark
+  mvc:
+    async:
+      request-timeout: 180000
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+      file-size-threshold: 0
+  datasource:
+    url: jdbc:postgresql://localhost:5432/eduspark?currentSchema=public&useUnicode=true&characterEncoding=utf8
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.eduspark.eduspark.pojo.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+  global-config:
+    db-config:
+      db-type: postgresql
+      id-type: auto
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: EdusparkSecretKey2024VeryLongAndSecureForJwtTokenGeneration
+  expiration: 604800
+  issuer: Eduspark
+
+rag:
+  storage:
+    base-path: /data/eduspark/knowledge
+    max-file-size: 100MB
+    allowed-types: pdf,docx,doc,txt,md
+  chunk:
+    target-size: 600
+    min-size: 100
+    overlap: 80
+  ollama:
+    base-url: http://localhost:11434
+    embedding-model: mxbai-embed-large
+    connect-timeout: 10000
+    read-timeout: 60000
+  embedding:
+    model: text-embedding-v3
+    # Embedding 用阿里云 DashScope（text-embedding-v3 在这），与聊天大模型解耦：
+    # 聊天可指向 deepseek 等其它平台，embedding 仍走 DashScope，互不影响。
+    # 注意：这里的 key 必须是有 text-embedding-v3 权限的 DashScope key（不是 deepseek 的 key）。
+    base-url: ${RAG_EMBEDDING_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+    api-key: ${RAG_EMBEDDING_API_KEY:}
+  search:
+    default-topk: 3
+    max-context-tokens: 2000
+    min-knowledge-threshold: 0.5
+    weights:
+      vector: 0.6
+      bm25: 0.4
+
+ollama:
+  chat:
+    base-url: http://localhost:11434
+    temperature: 0.7
+    max-tokens: 1024
+  connect-timeout: 30000
+  # PPT FullReplacement 一次性传 300+ placeholder 给 qwen3.6-plus，常超 3 分钟，给到 6 分钟兜底
+  read-timeout: 360000
+
+lesson-plan:
+  writer:
+    mode: external
+    fallback-to-local: false
+    external:
+      base-url: ${LESSON_PLAN_WRITER_EXTERNAL_BASE_URL:https://api.deepseek.com/v1}
+      api-key: ${LESSON_PLAN_WRITER_EXTERNAL_API_KEY:}
+      model: ${LESSON_PLAN_WRITER_EXTERNAL_MODEL:deepseek-v4-flash}
+      chat-path: /chat/completions
+      temperature: 0.4
+      max-tokens: 3072
+      connect-timeout: 30000
+      read-timeout: 180000
+      max-attempts: 2
+      retry-backoff-ms: 1200
+
+interactive:
+  template:
+    enabled: ${INTERACTIVE_TEMPLATE_ENABLED:false}
+    planner-model: ${INTERACTIVE_TEMPLATE_PLANNER_MODEL:${ollama.chat.model-extract:qwen2.5:14b-instruct-q4_K_M}}
+  writer:
+    mode: external
+    fallback-to-local: false
+    external:
+      base-url: ${INTERACTIVE_WRITER_EXTERNAL_BASE_URL:${lesson-plan.writer.external.base-url:https://dashscope.aliyuncs.com/compatible-mode/v1}}
+      api-key: ${INTERACTIVE_WRITER_EXTERNAL_API_KEY:${lesson-plan.writer.external.api-key:}}
+      model: ${INTERACTIVE_WRITER_EXTERNAL_MODEL:${lesson-plan.writer.external.model:qwen3.6-plus}}
+      chat-path: ${INTERACTIVE_WRITER_EXTERNAL_CHAT_PATH:${lesson-plan.writer.external.chat-path:/chat/completions}}
+      temperature: ${INTERACTIVE_WRITER_EXTERNAL_TEMPERATURE:${lesson-plan.writer.external.temperature:0.4}}
+      max-tokens: ${INTERACTIVE_WRITER_EXTERNAL_MAX_TOKENS:8192}
+      connect-timeout: ${INTERACTIVE_WRITER_EXTERNAL_CONNECT_TIMEOUT:${lesson-plan.writer.external.connect-timeout:30000}}
+      read-timeout: ${INTERACTIVE_WRITER_EXTERNAL_READ_TIMEOUT:${lesson-plan.writer.external.read-timeout:180000}}
+      max-attempts: ${INTERACTIVE_WRITER_EXTERNAL_MAX_ATTEMPTS:${lesson-plan.writer.external.max-attempts:2}}
+      retry-backoff-ms: ${INTERACTIVE_WRITER_EXTERNAL_RETRY_BACKOFF_MS:${lesson-plan.writer.external.retry-backoff-ms:1200}}
+
+ppt:
+  reveal:
+    # PPT 工作区"逐页揭幕"动画的节奏，单位毫秒。
+    # 后端在渲染完成后按这些节拍向前端推送 slide-level SSE 事件，
+    # 形成"骨架 → 背景图 → 标题 → bullets 逐条"的视觉效果。
+    skeleton-delay-ms: 250
+    background-delay-ms: 350
+    title-delay-ms: 200
+    bullet-delay-ms: 120
+    completion-delay-ms: 150
+  thumbnail:
+    # 异步把生成好的 pptx 用 LibreOffice 转 PDF + PDFBox 逐页 render PNG，上传 OSS 后回填到 slidesProgress[i].backgroundImageUrl，
+    # 前端缩略图条与主区域会自动替换为真实页面预览。
+    enabled: ${PPT_THUMBNAIL_ENABLED:true}
+    # Windows 默认装在 Program Files；Linux 一般 /usr/bin/soffice。可用环境变量覆盖。
+    libreoffice-path: ${LIBREOFFICE_PATH:C:/Program Files/LibreOffice/program/soffice.exe}
+    dpi: ${PPT_THUMBNAIL_DPI:144}
+    timeout-seconds: ${PPT_THUMBNAIL_TIMEOUT_SECONDS:90}
+    temp-dir: ${PPT_THUMBNAIL_TEMP_DIR:./temp/ppt-thumbnails}
+    oss-key-prefix: ${PPT_THUMBNAIL_OSS_PREFIX:ppt-thumbnails}
+
+websearch:
+  enabled: true
+  base-url: https://api.duckduckgo.com
+  timeout: 10000
+
+multimodal:
+  vision:
+    model: qwen-vl-max
+    prompt: "请详细描述这张图片的内容，如果是教学相关的图片请提取其中的关键信息和知识点。"
+  video:
+    enabled: true
+    ffmpeg-path: ffmpeg
+    frame-interval: 5
+    max-frames: 10
+    max-duration: 300
+    temp-dir: ./temp/video
+  connect-timeout: 10000
+  read-timeout: 60000
+
+whisper:
+  enabled: false
+  base-url: http://localhost:11434
+  model: whisper-large-v3
+  language: zh
+  connect-timeout: 10000
+  read-timeout: 60000
+
+aliyun:
+  asr:
+    enabled: true
+    app-key: 
+    access-key-id: 
+    access-key-secret: 
+    token: 
+    region: cn-shanghai
+    domain: nls-gateway-cn-shanghai.aliyuncs.com
+    api-version: 2024-04-19
+    language: zh-CN
+  oss:
+    endpoint: oss-cn-shanghai.aliyuncs.com
+    access-key-id: 
+    access-key-secret: 
+    bucket-name: bid-event3314904180
+    base-url: https://bid-event3314904180.oss-cn-shanghai.aliyuncs.com
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:4174,http://127.0.0.1:4174}
+
+logging:
+  level:
+    root: INFO
+    com.eduspark.eduspark: DEBUG
+    com.eduspark.eduspark.mapper: WARN
+    org.mybatis: WARN
+    com.baomidou.mybatisplus: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

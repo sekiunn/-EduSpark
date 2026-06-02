@@ -1,0 +1,72 @@
+/**
+ * EduSpark Admin · Design Tokens
+ * 与教师端共用同一套视觉语言。详见 HEADEND_CLIENT/EduSpark-Client/src/assets/tokens.css
+ */
+:root {
+  --es-bg: #f7f6f3;
+  --es-surface: #ffffff;
+  --es-surface-soft: #faf9f6;
+  --es-surface-muted: #f5f3ee;
+
+  --es-border: #e5e0d6;
+  --es-border-strong: #d8d1c6;
+
+  --es-text-primary: #171614;
+  --es-text-secondary: #5d594f;
+  --es-text-tertiary: #8a8478;
+  --es-text-inverse: #ffffff;
+
+  --es-accent: #1f1d1a;
+  --es-accent-soft: #ede8df;
+  --es-accent-contrast: #ffffff;
+
+  --es-link: #2f6fe5;
+  --es-link-hover: #2256c7;
+  --es-link-soft: #e6effc;
+  --es-link-soft-strong: #d2e0f7;
+  --es-link-contrast: #ffffff;
+
+  --es-success-bg: #eef4ef;
+  --es-success-text: #44624c;
+  --es-warning-bg: #f8f0e4;
+  --es-warning-text: #8a6531;
+  --es-danger-bg: #f8ece9;
+  --es-danger-text: #8e4e46;
+
+  --es-shadow-xs: 0 6px 18px rgba(17, 16, 12, 0.04);
+  --es-shadow-sm: 0 16px 36px rgba(17, 16, 12, 0.05);
+  --es-shadow-md: 0 24px 56px rgba(17, 16, 12, 0.07);
+  --es-shadow-lg: 0 32px 72px rgba(17, 16, 12, 0.10);
+
+  --es-radius-sm: 14px;
+  --es-radius-md: 18px;
+  --es-radius-lg: 24px;
+  --es-radius-pill: 999px;
+
+  --es-space-1: 4px;
+  --es-space-2: 8px;
+  --es-space-3: 12px;
+  --es-space-4: 16px;
+  --es-space-5: 20px;
+  --es-space-6: 24px;
+  --es-space-8: 32px;
+  --es-space-10: 40px;
+
+  --es-font-sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --es-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --es-motion-fast: 160ms;
+  --es-motion-base: 260ms;
+  --es-motion-slow: 420ms;
+  --es-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html, body, #app {
+  font-family: var(--es-font-sans);
+  color: var(--es-text-primary);
+}
+
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--es-link);
+  outline-offset: 2px;
+}

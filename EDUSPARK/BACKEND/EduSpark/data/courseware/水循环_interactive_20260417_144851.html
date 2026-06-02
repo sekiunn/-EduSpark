@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>水循环之旅</title>
+  <style>
+  :root {
+  color-scheme: light;
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel-soft: #f2f5fb;
+  --border: #d9e2f2;
+  --text: #1f2937;
+  --muted: #64748b;
+  --primary: #2563eb;
+  --primary-soft: #dbeafe;
+  --success: #0f766e;
+  --success-soft: #ecfdf5;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  --radius: 18px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, #eff6ff 0, transparent 42%),
+    linear-gradient(180deg, #f8fbff 0%, #f5f7fb 100%);
+  min-height: 100vh;
+}
+.shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.15;
+}
+.page-subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.page-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.button,
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.button-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.button-secondary {
+  background: #e2e8f0;
+  color: var(--text);
+}
+.button-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.button-ghost.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.muted {
+  color: var(--muted);
+}
+.panel-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.stat-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+.stat-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+.stat-value {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.note-box {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid #bae6d3;
+  font-size: 14px;
+  font-weight: 700;
+}
+.danger-box {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+@media (max-width: 760px) {
+  .shell { padding: 14px; }
+  .page-header { flex-direction: column; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+  .intro-card { margin-bottom: 16px; }
+.intro-text { margin: 12px 0 0; color: var(--text); line-height: 1.75; }
+.step-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+}
+.step-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.step-tab {
+  text-align: left;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: var(--text);
+}
+.step-tab.active {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.step-stage {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+.progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+.stage-index {
+  margin-top: 22px;
+  width: 70px;
+  height: 70px;
+  border-radius: 22px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+}
+.step-stage h2 {
+  margin: 18px 0 10px;
+  font-size: 28px;
+}
+.step-stage p {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+@media (max-width: 760px) {
+  .step-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+  </style>
+</head>
+<body>
+<div class="shell stepper-shell">
+  <header class="page-header">
+    <div>
+      <h1 id="titleText"></h1>
+      <p class="page-subtitle" id="subtitleText"></p>
+    </div>
+    <div class="row">
+      <button class="button button-primary" id="playBtn">自动播放</button>
+      <button class="button button-secondary" id="restartBtn">从头开始</button>
+    </div>
+  </header>
+
+  <section class="page-card intro-card">
+    <div class="chip">讲解流程</div>
+    <p id="introText" class="intro-text"></p>
+  </section>
+
+  <section class="step-layout">
+    <div class="page-card step-tabs" id="stepTabs"></div>
+    <div class="page-card step-stage">
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="stage-index" id="stageIndex"></div>
+      <h2 id="stepTitle"></h2>
+      <p id="stepText"></p>
+    </div>
+  </section>
+</div>
+
+<script>
+const spec = {"title":"水循环之旅","subtitle":"探索自然界的神秘过程","intro":"点击开始，让我们一起了解自然界中不可或缺的水循环过程。","steps":[{"title":"蒸发","text":"阳光照射使水面或地面水分变成气体，进入大气层。"},{"title":"凝结","text":"当空气中的水蒸气上升后遇冷液化成小水滴，形成云朵。"},{"title":"降水","text":"足够的水汽聚集到一定量时，会以雨、雪等形式降落回地面。"},{"title":"径流","text":"降落在地面上的水分沿着地形流动，汇入河流湖泊等水源。"}]};
+const steps = Array.isArray(spec.steps) ? spec.steps : [];
+const titleEl = document.getElementById('titleText');
+const subtitleEl = document.getElementById('subtitleText');
+const introText = document.getElementById('introText');
+const stepTabs = document.getElementById('stepTabs');
+const stepTitle = document.getElementById('stepTitle');
+const stepText = document.getElementById('stepText');
+const progressBar = document.getElementById('progressBar');
+const stageIndex = document.getElementById('stageIndex');
+const playBtn = document.getElementById('playBtn');
+const restartBtn = document.getElementById('restartBtn');
+
+titleEl.textContent = spec.title || '互动讲解页';
+subtitleEl.textContent = spec.subtitle || '按照顺序浏览步骤，用一页完成讲解、演示与归纳。';
+introText.textContent = spec.intro || '点击左侧步骤，逐步查看知识点。';
+
+let activeIndex = 0;
+let timer = 0;
+
+function setActive(index) {
+  activeIndex = Math.max(0, Math.min(index, steps.length - 1));
+  Array.from(stepTabs.children).forEach((button, buttonIndex) => {
+    button.classList.toggle('active', buttonIndex === activeIndex);
+  });
+  const step = steps[activeIndex] || { title: '步骤', text: '' };
+  stageIndex.textContent = String(activeIndex + 1);
+  stepTitle.textContent = step.title || ('步骤 ' + (activeIndex + 1));
+  stepText.textContent = step.text || '';
+  progressBar.style.width = (((activeIndex + 1) / Math.max(steps.length, 1)) * 100) + '%';
+}
+
+function stopAutoPlay() {
+  window.clearInterval(timer);
+  timer = 0;
+  playBtn.textContent = '自动播放';
+}
+
+function toggleAutoPlay() {
+  if (timer) {
+    stopAutoPlay();
+    return;
+  }
+  playBtn.textContent = '暂停播放';
+  timer = window.setInterval(() => {
+    if (activeIndex >= steps.length - 1) {
+      stopAutoPlay();
+      return;
+    }
+    setActive(activeIndex + 1);
+  }, 1800);
+}
+
+steps.forEach((step, index) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'button step-tab';
+  button.textContent = (index + 1) + '. ' + (step.title || ('步骤 ' + (index + 1)));
+  button.addEventListener('click', () => {
+    stopAutoPlay();
+    setActive(index);
+  });
+  stepTabs.appendChild(button);
+});
+
+if (!steps.length) {
+  const empty = document.createElement('div');
+  empty.className = 'muted';
+  empty.textContent = '当前还没有步骤内容。';
+  stepTabs.appendChild(empty);
+}
+
+playBtn.addEventListener('click', toggleAutoPlay);
+restartBtn.addEventListener('click', () => {
+  stopAutoPlay();
+  setActive(0);
+});
+setActive(0);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>动量守恒演示</title>
+  <style>
+  :root {
+  color-scheme: light;
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel-soft: #f2f5fb;
+  --border: #d9e2f2;
+  --text: #1f2937;
+  --muted: #64748b;
+  --primary: #2563eb;
+  --primary-soft: #dbeafe;
+  --success: #0f766e;
+  --success-soft: #ecfdf5;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  --radius: 18px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, #eff6ff 0, transparent 42%),
+    linear-gradient(180deg, #f8fbff 0%, #f5f7fb 100%);
+  min-height: 100vh;
+}
+.shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.15;
+}
+.page-subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.page-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.button,
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.button-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.button-secondary {
+  background: #e2e8f0;
+  color: var(--text);
+}
+.button-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.button-ghost.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.muted {
+  color: var(--muted);
+}
+.panel-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.stat-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+.stat-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+.stat-value {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.note-box {
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid #bae6d3;
+  font-size: 14px;
+  font-weight: 700;
+}
+.danger-box {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+@media (max-width: 760px) {
+  .shell { padding: 14px; }
+  .page-header { flex-direction: column; }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+  .control-panel { margin-bottom: 16px; }
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.control-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+.control-item strong {
+  color: var(--primary);
+  font-size: 15px;
+}
+.control-item input { width: 100%; }
+.actions { margin-top: 12px; }
+.scene-card { margin: 16px 0; }
+#collisionCanvas {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(37, 99, 235, 0.05), rgba(255, 255, 255, 0)),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--border);
+}
+.scene-hint {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.formula-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 760px) {
+  .control-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .control-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+  </style>
+</head>
+<body>
+<div class="shell collision-shell">
+  <header class="page-header">
+    <div>
+      <h1 id="titleText"></h1>
+      <p class="page-subtitle" id="subtitleText"></p>
+    </div>
+    <div class="row">
+      <button class="button button-ghost mode-btn" data-mode="elastic">弹性碰撞</button>
+      <button class="button button-ghost mode-btn" data-mode="inelastic">完全非弹性</button>
+    </div>
+  </header>
+
+  <section class="page-card control-panel">
+    <div class="control-grid">
+      <label class="control-item">
+        <span>物体 A 质量</span>
+        <strong id="massALabel"></strong>
+        <input id="massA" type="range" min="1" max="5" step="0.5" />
+      </label>
+      <label class="control-item">
+        <span>物体 A 速度</span>
+        <strong id="velocityALabel"></strong>
+        <input id="velocityA" type="range" min="-6" max="6" step="0.5" />
+      </label>
+      <label class="control-item">
+        <span>物体 B 质量</span>
+        <strong id="massBLabel"></strong>
+        <input id="massB" type="range" min="1" max="5" step="0.5" />
+      </label>
+      <label class="control-item">
+        <span>物体 B 速度</span>
+        <strong id="velocityBLabel"></strong>
+        <input id="velocityB" type="range" min="-6" max="6" step="0.5" />
+      </label>
+    </div>
+    <div class="row actions">
+      <button class="button button-primary" id="startBtn">开始演示</button>
+      <button class="button button-secondary" id="resetBtn">重置</button>
+    </div>
+  </section>
+
+  <section class="page-card scene-card">
+    <canvas id="collisionCanvas" height="240"></canvas>
+    <div class="scene-hint" id="hintBox"></div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="stat-label">碰撞前总动量</div>
+      <div class="stat-value" id="beforeMomentum"></div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">当前总动量</div>
+      <div class="stat-value" id="currentMomentum"></div>
+    </article>
+    <article class="stat-card" id="energyBeforeCard">
+      <div class="stat-label">碰撞前总动能</div>
+      <div class="stat-value" id="beforeEnergy"></div>
+    </article>
+    <article class="stat-card" id="energyCurrentCard">
+      <div class="stat-label">当前总动能</div>
+      <div class="stat-value" id="currentEnergy"></div>
+    </article>
+  </section>
+
+  <section class="page-card">
+    <div class="note-box" id="conclusionBox"></div>
+    <div class="formula-box" id="formulaBox"></div>
+  </section>
+</div>
+
+<script>
+const spec = {"title":"动量守恒演示","subtitle":"弹性与非弹性碰撞","massA":2.0,"massB":1.0,"velocityA":4.0,"velocityB":0.0,"defaultCollisionType":"elastic","showKineticEnergy":true,"showFormula":true};
+const titleEl = document.getElementById('titleText');
+const subtitleEl = document.getElementById('subtitleText');
+const modeButtons = Array.from(document.querySelectorAll('.mode-btn'));
+const controls = {
+  massA: document.getElementById('massA'),
+  velocityA: document.getElementById('velocityA'),
+  massB: document.getElementById('massB'),
+  velocityB: document.getElementById('velocityB')
+};
+const labels = {
+  massA: document.getElementById('massALabel'),
+  velocityA: document.getElementById('velocityALabel'),
+  massB: document.getElementById('massBLabel'),
+  velocityB: document.getElementById('velocityBLabel')
+};
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const hintBox = document.getElementById('hintBox');
+const conclusionBox = document.getElementById('conclusionBox');
+const formulaBox = document.getElementById('formulaBox');
+const energyBeforeCard = document.getElementById('energyBeforeCard');
+const energyCurrentCard = document.getElementById('energyCurrentCard');
+const canvas = document.getElementById('collisionCanvas');
+const ctx = canvas.getContext('2d');
+
+titleEl.textContent = spec.title || '动量守恒碰撞演示';
+subtitleEl.textContent = spec.subtitle || '调节质量与速度，观察系统总动量在碰撞前后如何保持不变。';
+
+const state = {
+  mode: spec.defaultCollisionType === 'inelastic' ? 'inelastic' : 'elastic',
+  running: false,
+  collided: false,
+  rafId: 0,
+  lastTs: 0,
+  before: null,
+  ballA: null,
+  ballB: null
+};
+
+function format(num, digits = 2) {
+  return Number(num || 0).toFixed(digits);
+}
+
+function momentum(m, v) {
+  return m * v;
+}
+
+function kinetic(m, v) {
+  return 0.5 * m * v * v;
+}
+
+function readConfig() {
+  return {
+    massA: parseFloat(controls.massA.value),
+    velocityA: parseFloat(controls.velocityA.value),
+    massB: parseFloat(controls.massB.value),
+    velocityB: parseFloat(controls.velocityB.value)
+  };
+}
+
+function syncLabels() {
+  labels.massA.textContent = format(controls.massA.value, 1) + ' kg';
+  labels.velocityA.textContent = format(controls.velocityA.value, 1) + ' m/s';
+  labels.massB.textContent = format(controls.massB.value, 1) + ' kg';
+  labels.velocityB.textContent = format(controls.velocityB.value, 1) + ' m/s';
+}
+
+function syncModeButtons() {
+  modeButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.mode === state.mode);
+  });
+}
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(320, canvas.clientWidth || 320);
+  const height = 240;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function getWidth() {
+  return canvas.width / (window.devicePixelRatio || 1);
+}
+
+function buildSnapshot(ballA, ballB) {
+  return {
+    totalMomentum: momentum(ballA.m, ballA.v) + momentum(ballB.m, ballB.v),
+    totalEnergy: kinetic(ballA.m, ballA.v) + kinetic(ballB.m, ballB.v)
+  };
+}
+
+function updateReadout() {
+  const current = buildSnapshot(state.ballA, state.ballB);
+  document.getElementById('beforeMomentum').textContent = format(state.before.totalMomentum) + ' kg·m/s';
+  document.getElementById('currentMomentum').textContent = format(current.totalMomentum) + ' kg·m/s';
+  document.getElementById('beforeEnergy').textContent = format(state.before.totalEnergy) + ' J';
+  document.getElementById('currentEnergy').textContent = format(current.totalEnergy) + ' J';
+
+  const deltaP = Math.abs(current.totalMomentum - state.before.totalMomentum);
+  const deltaE = Math.abs(current.totalEnergy - state.before.totalEnergy);
+  let summary = deltaP < 0.02
+    ? '系统总动量保持不变。'
+    : '系统总动量出现了较大的数值偏差。';
+  if (spec.showKineticEnergy !== false) {
+    summary += state.mode === 'elastic'
+      ? (deltaE < 0.02 ? ' 在弹性碰撞中，总动能也近似保持不变。' : ' 理论上弹性碰撞应保持总动能不变。')
+      : ' 完全非弹性碰撞中，总动能会转化为其他形式的能量。';
+  }
+  conclusionBox.textContent = summary;
+}
+
+function setHint(text, isDanger) {
+  hintBox.textContent = text;
+  hintBox.style.color = isDanger ? 'var(--danger)' : 'var(--muted)';
+}
+
+function updateButtons() {
+  startBtn.disabled = state.running;
+}
+
+function applyCollision() {
+  const m1 = state.ballA.m;
+  const m2 = state.ballB.m;
+  const u1 = state.ballA.v;
+  const u2 = state.ballB.v;
+
+  if (state.mode === 'elastic') {
+    state.ballA.v = ((m1 - m2) * u1 + 2 * m2 * u2) / (m1 + m2);
+    state.ballB.v = ((m2 - m1) * u2 + 2 * m1 * u1) / (m1 + m2);
+    setHint('已发生弹性碰撞。继续观察碰撞后两物体的速度变化。');
+  } else {
+    const v = (m1 * u1 + m2 * u2) / (m1 + m2);
+    state.ballA.v = v;
+    state.ballB.v = v;
+    setHint('已发生完全非弹性碰撞。两个物体随后保持共同速度前进。');
+  }
+  state.collided = true;
+}
+
+function resetScene(message) {
+  cancelAnimationFrame(state.rafId);
+  state.running = false;
+  state.collided = false;
+  state.lastTs = 0;
+  resizeCanvas();
+
+  const cfg = readConfig();
+  const width = getWidth();
+  state.ballA = { label: 'A', color: '#2563eb', m: cfg.massA, v: cfg.velocityA, x: width * 0.2, r: 24 };
+  state.ballB = { label: 'B', color: '#ef4444', m: cfg.massB, v: cfg.velocityB, x: width * 0.8, r: 24 };
+  if (state.ballB.x - state.ballA.x < 180) {
+    state.ballA.x = width * 0.16;
+    state.ballB.x = width * 0.84;
+  }
+  state.before = buildSnapshot(state.ballA, state.ballB);
+  energyBeforeCard.style.display = spec.showKineticEnergy === false ? 'none' : '';
+  energyCurrentCard.style.display = spec.showKineticEnergy === false ? 'none' : '';
+  formulaBox.style.display = spec.showFormula === false ? 'none' : '';
+  formulaBox.innerHTML = state.mode === 'elastic'
+    ? '弹性碰撞: p 前 = p 后，且总动能近似守恒。'
+    : '完全非弹性碰撞: p 前 = p 后，但碰撞后二者具有共同速度。';
+  updateButtons();
+  updateReadout();
+  setHint(message || '点击“开始演示”查看碰撞过程。');
+  render();
+}
+
+function drawVelocityArrow(x, y, velocity, color) {
+  const length = velocity * 16;
+  if (Math.abs(length) < 6) {
+    return;
+  }
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + length, y);
+  ctx.stroke();
+  const direction = length >= 0 ? 1 : -1;
+  ctx.beginPath();
+  ctx.moveTo(x + length, y);
+  ctx.lineTo(x + length - 10 * direction, y - 6);
+  ctx.lineTo(x + length - 10 * direction, y + 6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBall(ball, baselineY) {
+  ctx.save();
+  ctx.fillStyle = ball.color;
+  ctx.beginPath();
+  ctx.arc(ball.x, baselineY, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px Microsoft YaHei';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(ball.label, ball.x, baselineY);
+  ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle = '#0f172a';
+  ctx.font = '13px Microsoft YaHei';
+  ctx.textAlign = 'center';
+  ctx.fillText('m=' + format(ball.m, 1) + 'kg', ball.x, baselineY + 44);
+  ctx.fillText('v=' + format(ball.v, 1) + 'm/s', ball.x, baselineY + 60);
+  ctx.restore();
+}
+
+function render() {
+  resizeCanvas();
+  const width = getWidth();
+  const height = 240;
+  ctx.clearRect(0, 0, width, height);
+  const baselineY = 118;
+
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(24, baselineY + 32);
+  ctx.lineTo(width - 24, baselineY + 32);
+  ctx.stroke();
+
+  drawBall(state.ballA, baselineY);
+  drawBall(state.ballB, baselineY);
+  drawVelocityArrow(state.ballA.x, baselineY - 42, state.ballA.v, '#2563eb');
+  drawVelocityArrow(state.ballB.x, baselineY - 42, state.ballB.v, '#ef4444');
+}
+
+function tick(timestamp) {
+  if (!state.running) {
+    return;
+  }
+  if (!state.lastTs) {
+    state.lastTs = timestamp;
+  }
+  const dt = Math.min((timestamp - state.lastTs) / 16.666, 2.2);
+  state.lastTs = timestamp;
+  const speedScale = 7.5;
+
+  state.ballA.x += state.ballA.v * speedScale * dt;
+  state.ballB.x += state.ballB.v * speedScale * dt;
+
+  if (!state.collided && Math.abs(state.ballB.x - state.ballA.x) <= state.ballA.r + state.ballB.r) {
+    const center = (state.ballA.x + state.ballB.x) / 2;
+    state.ballA.x = center - state.ballA.r;
+    state.ballB.x = center + state.ballB.r;
+    applyCollision();
+  }
+  if (state.collided && state.mode === 'inelastic') {
+    state.ballB.x = state.ballA.x + state.ballA.r + state.ballB.r;
+  }
+
+  render();
+  updateReadout();
+
+  const width = getWidth();
+  if (state.ballA.x < -80 || state.ballA.x > width + 80 || state.ballB.x < -80 || state.ballB.x > width + 80) {
+    state.running = false;
+    updateButtons();
+    setHint('演示结束。你可以修改参数后再次观察。');
+    return;
+  }
+  state.rafId = requestAnimationFrame(tick);
+}
+
+function startSimulation() {
+  if (state.running) {
+    return;
+  }
+  if (state.ballA.v <= state.ballB.v) {
+    setHint('当前速度设置下两物体不会相撞，请调整参数后再开始。', true);
+    return;
+  }
+  state.running = true;
+  updateButtons();
+  setHint('正在演示碰撞过程...');
+  state.rafId = requestAnimationFrame(tick);
+}
+
+controls.massA.value = spec.massA ?? 2;
+controls.velocityA.value = spec.velocityA ?? 4;
+controls.massB.value = spec.massB ?? 1;
+controls.velocityB.value = spec.velocityB ?? 0;
+syncLabels();
+syncModeButtons();
+resetScene();
+
+Object.values(controls).forEach((control) => {
+  control.addEventListener('input', () => {
+    syncLabels();
+    resetScene('参数已更新，场景已重置。');
+  });
+});
+modeButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    state.mode = button.dataset.mode;
+    syncModeButtons();
+    resetScene('碰撞类型已切换。');
+  });
+});
+startBtn.addEventListener('click', startSimulation);
+resetBtn.addEventListener('click', () => resetScene('已重置为当前参数。'));
+window.addEventListener('resize', () => render());
+
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+:root {
+  --admin-primary: var(--es-link);
+  --admin-primary-rgb: 47, 111, 229;
+  --admin-primary-soft: var(--es-link-soft);
+  --admin-text: var(--es-text-primary);
+  --admin-text-secondary: var(--es-text-secondary);
+  --admin-text-muted: var(--es-text-tertiary);
+  --admin-border: var(--es-border);
+  --admin-white: var(--es-surface);
+  --admin-bg: var(--es-bg);
+  --admin-hover-bg: var(--es-surface-soft);
+  --admin-success: var(--es-success-text);
+  --admin-warning: var(--es-warning-text);
+  --admin-danger: var(--es-danger-text);
+  --admin-shadow: var(--es-shadow-sm);
+  --admin-card-shadow: var(--es-shadow-md);
+  --admin-radius-lg: var(--es-radius-md);
+  --admin-radius-md: var(--es-radius-sm);
+  --admin-radius-sm: 10px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  font-family:
+    'PingFang SC',
+    'Microsoft YaHei',
+    'Helvetica Neue',
+    sans-serif;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+textarea {
+  resize: vertical;
+}
+
+::selection {
+  color: var(--es-text-inverse);
+  background: rgba(var(--admin-primary-rgb), 0.7);
+}

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>动量守恒（碰撞）：弹性 / 非弹性碰撞</title>
+</head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动量守恒定律：碰撞演示</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --danger: #ef4444;
+    --success: #10b981;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --border: #e5e7eb;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  header { text-align: center; margin-bottom: 10px; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; color: var(--primary); }
+  .desc { color: var(--text-light); font-size: 0.95rem; }
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .control-group { display: flex; flex-direction: column; gap: 6px; }
+  .control-group label { font-weight: 600; font-size: 0.9rem; color: var(--text-light); }
+  .control-group input[type="range"] { width: 100%; cursor: pointer; }
+  .val-display { font-family: monospace; font-size: 0.9rem; color: var(--primary); font-weight: bold; }
+  .type-toggle {
+    display: flex; gap: 10px; margin-top: 10px;
+  }
+  .type-btn {
+    flex: 1; padding: 10px; border: 2px solid var(--border); background: transparent;
+    border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+  }
+  .type-btn.active { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+  .type-btn:hover:not(.active) { background: #f9fafb; }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+  button.action-btn {
+    flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-size: 1rem;
+  }
+  .btn-start { background: var(--primary); color: white; }
+  .btn-start:hover { background: var(--primary-hover); }
+  .btn-start:disabled { background: #9ca3af; cursor: not-allowed; }
+  .btn-reset { background: #f3f4f6; color: var(--text); }
+  .btn-reset:hover { background: #e5e7eb; }
+  .sim-panel { position: relative; overflow: hidden; }
+  canvas { width: 100%; height: 220px; display: block; background: #f8fafc; border-radius: 8px; }
+  .sim-overlay {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.7); color: white; padding: 6px 14px; border-radius: 20px;
+    font-size: 0.85rem; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  }
+  .sim-overlay.show { opacity: 1; }
+  .data-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  @media (max-width: 600px) { .data-grid { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
+  th { background: #f9fafb; color: var(--text-light); font-weight: 600; }
+  .highlight { color: var(--primary); font-weight: bold; }
+  .conservation-box {
+    margin-top: 15px; padding: 12px; background: #ecfdf5; border: 1px solid #a7f3d0;
+    border-radius: 8px; text-align: center; font-weight: 600; color: #065f46;
+  }
+  .warning { color: var(--danger); font-size: 0.85rem; margin-top: 5px; min-height: 1.2em; }
+  .legend { display: flex; gap: 15px; justify-content: center; margin-top: 8px; font-size: 0.8rem; color: var(--text-light); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>动量守恒定律：碰撞演示</h1>
+    <p class="desc">在不受外力作用的系统中，无论发生弹性还是非弹性碰撞，系统总动量始终保持不变。</p>
+  </header>
+
+  <div class="panel controls">
+    <div class="control-group">
+      <label>物体 A 质量 (m₁) <span class="val-display" id="m1Val">2.0 kg</span></label>
+      <input type="range" id="m1" min="1" max="5" step="0.5" value="2">
+    </div>
+    <div class="control-group">
+      <label>物体 A 初速度 (v₁) <span class="val-display" id="v1Val">4.0 m/s</span></label>
+      <input type="range" id="v1" min="-6" max="6" step="0.5" value="4">
+    </div>
+    <div class="control-group">
+      <label>物体 B 质量 (m₂) <span class="val-display" id="m2Val">3.0 kg</span></label>
+      <input type="range" id="m2" min="1" max="5" step="0.5" value="3">
+    </div>
+    <div class="control-group">
+      <label>物体 B 初速度 (v₂) <span class="val-display" id="v2Val">-2.0 m/s</span></label>
+      <input type="range" id="v2" min="-6" max="6" step="0.5" value="-2">
+    </div>
+    <div class="control-group" style="grid-column: 1 / -1;">
+      <label>碰撞类型</label>
+      <div class="type-toggle">
+        <button class="type-btn active" data-type="elastic">弹性碰撞 (动能守恒)</button>
+        <button class="type-btn" data-type="inelastic">完全非弹性碰撞 (粘合)</button>
+      </div>
+      <div class="warning" id="warnMsg"></div>
+    </div>
+    <div class="btn-row" style="grid-column: 1 / -1;">
+      <button class="action-btn btn-start" id="startBtn">▶ 开始演示</button>
+      <button class="action-btn btn-reset" id="resetBtn">↺ 重置</button>
+    </div>
+  </div>
+
+  <div class="panel sim-panel">
+    <canvas id="simCanvas"></canvas>
+    <div class="sim-overlay" id="statusMsg">碰撞发生！</div>
+    <div class="legend">
+      <span><span class="dot" style="background:#3b82f6"></span> 物体 A</span>
+      <span><span class="dot" style="background:#ef4444"></span> 物体 B</span>
+      <span>箭头长度 ∝ 速度大小</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="data-grid">
+      <div>
+        <h3 style="margin-bottom:10px; font-size:1rem;">📊 碰撞前状态</h3>
+        <table id="tableBefore">
+          <tr><th>物体</th><th>质量(kg)</th><th>速度(m/s)</th><th>动量(kg·m/s)</th></tr>
+          <tr><td>A</td><td id="tb_m1">-</td><td id="tb_v1">-</td><td id="tb_p1">-</td></tr>
+          <tr><td>B</td><td id="tb_m2">-</td><td id="tb_v2">-</td><td id="tb_p2">-</td></tr>
+          <tr style="background:#f8fafc; font-weight:600;"><td colspan="3">系统总动量 P<sub>前</sub></td><td id="tb_ptotal" class="highlight">-</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 style="margin-bottom:10px; font-size:1rem;">📊 碰撞后状态</h3>
+        <table id="tableAfter">
+          <tr><th>物体</th><th>质量(kg)</th><th>速度(m/s)</th><th>动量(kg·m/s)</th></tr>
+          <tr><td>A</td><td id="ta_m1">-</td><td id="ta_v1">-</td><td id="ta_p1">-</td></tr>
+          <tr><td>B</td><td id="ta_m2">-</td><td id="ta_v2">-</td><td id="ta_p2">-</td></tr>
+          <tr style="background:#f8fafc; font-weight:600;"><td colspan="3">系统总动量 P<sub>后</sub></td><td id="ta_ptotal" class="highlight">-</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="conservation-box" id="conclusionBox">
+      点击“开始演示”观察动量守恒现象
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('simCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  let width, height;
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // State
+  const SCALE = 50; // pixels per m/s
+  const RADIUS = 22;
+  const state = {
+    running: false,
+    collided: false,
+    type: 'elastic',
+    lastTime: 0,
+    balls: [
+      { id: 1, m: 2, v: 4, x: 0, color: '#3b82f6', label: 'A' },
+      { id: 2, m: 3, v: -2, x: 0, color: '#ef4444', label: 'B' }
+    ],
+    initMomentum: 0
+  };
+
+  // DOM refs
+  const els = {
+    m1: document.getElementById('m1'), v1: document.getElementById('v1'),
+    m2: document.getElementById('m2'), v2: document.getElementById('v2'),
+    m1Val: document.getElementById('m1Val'), v1Val: document.getElementById('v1Val'),
+    m2Val: document.getElementById('m2Val'), v2Val: document.getElementById('v2Val'),
+    startBtn: document.getElementById('startBtn'), resetBtn: document.getElementById('resetBtn'),
+    typeBtns: document.querySelectorAll('.type-btn'),
+    warnMsg: document.getElementById('warnMsg'),
+    statusMsg: document.getElementById('statusMsg'),
+    conclusionBox: document.getElementById('conclusionBox'),
+    tables: {
+      tb_m1: document.getElementById('tb_m1'), tb_v1: document.getElementById('tb_v1'), tb_p1: document.getElementById('tb_p1'),
+      tb_m2: document.getElementById('tb_m2'), tb_v2: document.getElementById('tb_v2'), tb_p2: document.getElementById('tb_p2'),
+      tb_ptotal: document.getElementById('tb_ptotal'),
+      ta_m1: document.getElementById('ta_m1'), ta_v1: document.getElementById('ta_v1'), ta_p1: document.getElementById('ta_p1'),
+      ta_m2: document.getElementById('ta_m2'), ta_v2: document.getElementById('ta_v2'), ta_p2: document.getElementById('ta_p2'),
+      ta_ptotal: document.getElementById('ta_ptotal')
+    }
+  };
+
+  function updateInputs() {
+    state.balls[0].m = parseFloat(els.m1.value);
+    state.balls[0].v = parseFloat(els.v1.value);
+    state.balls[1].m = parseFloat(els.m2.value);
+    state.balls[1].v = parseFloat(els.v2.value);
+
+    els.m1Val.textContent = state.balls[0].m.toFixed(1) + ' kg';
+    els.v1Val.textContent = state.balls[0].v.toFixed(1) + ' m/s';
+    els.m2Val.textContent = state.balls[1].m.toFixed(1) + ' kg';
+    els.v2Val.textContent = state.balls[1].v.toFixed(1) + ' m/s';
+
+    // Validation
+    const willCollide = state.balls[0].v > state.balls[1].v;
+    els.warnMsg.textContent = willCollide ? '' : '⚠️ 当前速度设置下两物体不会相撞，请调整速度。';
+    els.startBtn.disabled = !willCollide;
+
+    if (!state.running) {
+      updateTable('before', state.balls[0], state.balls[1]);
+      updateTable('after', null, null);
+      els.conclusionBox.textContent = '点击“开始演示”观察动量守恒现象';
+      els.conclusionBox.style.background = '#ecfdf5';
+      els.conclusionBox.style.color = '#065f46';
+    }
+  }
+
+  function updateTable(phase, b1, b2) {
+    const t = els.tables;
+    if (phase === 'before') {
+      t.tb_m1.textContent = b1.m.toFixed(1); t.tb_v1.textContent = b1.v.toFixed(2); t.tb_p1.textContent = (b1.m * b1.v).toFixed(2);
+      t.tb_m2.textContent = b2.m.toFixed(1); t.tb_v2.textContent = b2.v.toFixed(2); t.tb_p2.textContent = (b2.m * b2.v).toFixed(2);
+      const pTotal = b1.m * b1.v + b2.m * b2.v;
+      t.tb_ptotal.textContent = pTotal.toFixed(2);
+      state.initMomentum = pTotal;
+    } else {
+      t.ta_m1.textContent = b1.m.toFixed(1); t.ta_v1.textContent = b1.v.toFixed(2); t.ta_p1.textContent = (b1.m * b1.v).toFixed(2);
+      t.ta_m2.textContent = b2.m.toFixed(1); t.ta_v2.textContent = b2.v.toFixed(2); t.ta_p2.textContent = (b2.m * b2.v).toFixed(2);
+      const pTotal = b1.m * b1.v + b2.m * b2.v;
+      t.ta_ptotal.textContent = pTotal.toFixed(2);
+      const diff = Math.abs(pTotal - state.initMomentum);
+</html>
